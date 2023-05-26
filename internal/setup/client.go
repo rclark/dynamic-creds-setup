@@ -37,9 +37,6 @@ func getFingerprint(ctx context.Context, domain string) (string, error) {
 	fingerprint := sha1.Sum(cert.Raw)
 	var buf bytes.Buffer
 	for _, f := range fingerprint {
-		// if i > 0 {
-		// 	fmt.Fprintf(&buf, ":")
-		// }
 		fmt.Fprintf(&buf, "%02X", f)
 	}
 
@@ -106,12 +103,13 @@ func (c Client) SetupAdminRole(ctx context.Context, oidcArn, orgName string) (st
 		}},
 	}
 
-	name := "tfc-power-user"
+	name := fmt.Sprintf("tfc-power-user-%s", orgName)
+	desc := fmt.Sprintf("Provides the %s TFC organization with power-user permissions", orgName)
 
 	role, err := c.iam.CreateRole(ctx, &iam.CreateRoleInput{
 		AssumeRolePolicyDocument: aws.String(assume.String()),
 		RoleName:                 aws.String(name),
-		Description:              aws.String("Provides TFC with power-user permissions"),
+		Description:              aws.String(desc),
 	})
 	if err != nil {
 		return "", err
